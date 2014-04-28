@@ -7,6 +7,7 @@ package {
 	import flash.geom.Rectangle;
 	import flash.media.Sound;
 	import flash.system.fscommand;
+	import flash.text.Font;
 	import flash.text.TextField;
 	import flash.text.TextFormat;
 
@@ -60,6 +61,8 @@ package {
 		private var fireTorpedoSound:Sound = new FireTorpedoSound() as Sound;
 		private var sharkHitSound:Sound = new SharkHitSound() as Sound;
 		private var shipExplosionSound:Sound = new ShipExplosionSound() as Sound;
+	
+		private static var timesSquareFont:Font = new TimesSquareFont() as Font;
 		
 		/**
 		 * SurfsDown
@@ -264,7 +267,8 @@ package {
 		private function createTextField(x:Number = 0, y:Number = 0, width:Number = 0, height:Number = 0, fontSize:uint = 32):TextField {
 
 			var textField:TextField = new TextField();
-			textField.defaultTextFormat = new TextFormat("Times Square", fontSize, 0xFFFFFF);
+			textField.defaultTextFormat = new TextFormat(timesSquareFont.fontName, fontSize, 0xFFFFFF); // "Times Square"
+			textField.embedFonts = true;
 
 			textField.x = x;
 			textField.y = y;
