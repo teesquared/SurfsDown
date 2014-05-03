@@ -56,6 +56,9 @@ package {
 		private var anyKeyPressed:Boolean = false;
 
 		private var updateFunction:Function = null;
+		
+		private var testGame:Boolean = false;
+		private var testEnabled:Boolean = false;
 
 		private var depthAlarmSound:Sound = new DepthAlarmSound() as Sound;
 		private var fireTorpedoSound:Sound = new FireTorpedoSound() as Sound;
@@ -161,7 +164,15 @@ package {
 			deathCounter = 0;
 			
 			destroyEnemies();
-			createEnemyShark();
+
+			if (!testGame) {
+				createEnemyShark();
+			}
+			else {
+				createSharkProp(256 - 16, 128 + 48, 0);
+				score = 2340;
+				depth = 10000;
+			}
 
 			updateFunction = updateGame;
 		}
@@ -227,6 +238,20 @@ package {
 				enemyLayer.addChild(enemy);
 				enemies.push(enemy);
 			}
+		}
+
+		/**
+		 * createSharkProp
+		 *
+		 * @param	x
+		 * @param	y
+		 * @param	rot
+		 */
+		private function createSharkProp(x:Number, y:Number, rot:Number):void {
+			var sharkProp:SharkProp = new SharkProp();
+			sharkProp.setPosition(x - sharkProp.width / 2, y, rot);
+			enemyLayer.addChild(sharkProp);
+			enemies.push(sharkProp);
 		}
 
 		/**
@@ -353,9 +378,11 @@ package {
 		private function updateMenu():void {
 			if (frameCounter % 120 == 0)
 				fireTorpedo();
-
-			if (anyKeyPressed)
+			
+			if (anyKeyPressed) {
+				testGame = testEnabled && keys[84]; // T
 				startGame();
+			}
 		}
 
 		/**
@@ -391,13 +418,16 @@ package {
 
 			if (keys[13] || keys[32])
 				fireTorpedo();
+
+			if (testGame && keys[81])
+				endGame();
 			
 			yellowSubmarine.setMoveX(moveX);
 			yellowSubmarine.setMoveY(moveY);
 
 			checkCollision();
 			
-			if (++depth % 200 == 0)
+			if (++depth % 200 == 0 && !testGame)
 				createEnemyShark();
 
 			if (depth > 10000) {
@@ -442,11 +472,11 @@ package {
 
 			for each (var enemy:Enemy in enemies) {
 
-				if (yellowSubmarine.visible && !yellowSubmarine.isInvulernable() && yellowSubmarine.hitTestBoundBox(enemy)) {
+				if (yellowSubmarine.visible && !yellowSubmarine.isInvulernable() && yellowSubmarine.hitTestBoundingBox(enemy)) {
 					playerHit();
 				}
 
-				if (torpedo.active && torpedo.hitTestBoundBox(enemy)) {
+				if (torpedo.active && torpedo.hitTestBoundingBox(enemy)) {
 
 					score += enemy.getScorePoints();
 

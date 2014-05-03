@@ -3,6 +3,8 @@ package
 	import flash.display.DisplayObject;
 	import flash.display.Sprite;
 	import flash.events.Event;
+	import flash.geom.Point;
+	import flash.geom.Rectangle;
 	
 	/**
 	 * SpriteBase
@@ -169,17 +171,68 @@ package
 		}
 
 		/**
-		 * hitTestBoundBox
+		 * checkPointsInBounds
+		 *
+		 * @param	d1
+		 * @param	d2
+		 * @return
+		 */
+		public function checkPointsInBounds(d1:DisplayObject, d2:DisplayObject):Boolean {
+
+			// bounding rect of both objects
+			const b1:Rectangle = d1.getBounds(d1);
+			const b2:Rectangle = d2.getBounds(d2);
+
+			// get 4 points in global space
+			const b2p1g:Point = d2.localToGlobal(b2.topLeft);
+			const b2p2g:Point = d2.localToGlobal(new Point(b2.x + b2.width, b2.y));
+			const b2p3g:Point = d2.localToGlobal(b2.bottomRight);
+			const b2p4g:Point = d2.localToGlobal(new Point(b2.x, b2.y + b2.height));
+			
+			if (b1.containsPoint(d1.globalToLocal(b2p1g)))
+				return true;
+
+			if (b1.containsPoint(d1.globalToLocal(b2p2g)))
+				return true;
+
+			if (b1.containsPoint(d1.globalToLocal(b2p3g)))
+				return true;
+
+			if (b1.containsPoint(d1.globalToLocal(b2p4g)))
+				return true;
+
+			return false;
+		}
+
+		/**
+		 * checkOverlap
+		 *
+		 * @param	bbox
+		 * @return
+		 */
+		public function checkOverlap(otherBoundingBox:DisplayObject):Boolean {
+			return checkPointsInBounds(getBoundingBox(), otherBoundingBox)
+				|| checkPointsInBounds(otherBoundingBox, getBoundingBox());
+		}
+
+		/**
+		 * hitTestBoundingBox
 		 *
 		 * @param	obj
 		 * @return
 		 */
-		public function hitTestBoundBox(obj:DisplayObject):Boolean 
+		public function hitTestBoundingBox(obj:DisplayObject):Boolean 
 		{
 			const gameSprite:GameSprite = obj as GameSprite;
-			const bbox:DisplayObject = gameSprite ? gameSprite.getBoundingBox() : obj;
+			const otherBoundingBox:DisplayObject = gameSprite ? gameSprite.getBoundingBox() : obj;
 
-			return getBoundingBox().hitTestObject(bbox);
+			if (!getBoundingBox().hitTestObject(otherBoundingBox))
+				return false;
+
+			if (rotation == 0 && obj.rotation == 0)
+				return false;
+
+			return checkOverlap(otherBoundingBox);
 		}
 	}
 }
