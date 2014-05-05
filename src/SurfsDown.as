@@ -1,5 +1,6 @@
 package {
 	import flash.display.DisplayObject;
+	import flash.display.Graphics;
 	import flash.display.Sprite;
 	import flash.display.StageQuality;
 	import flash.events.Event;
@@ -22,8 +23,7 @@ package {
 		public static const HEIGHT:Number = 512;
 
 		public static var gameActive:Boolean = false;
-		
-		private var yellowSubmarine:YellowSubmarine = null;
+		public static var yellowSubmarine:YellowSubmarine = null;
 
 		private var torpedo:Torpedo = null;
 
@@ -39,6 +39,7 @@ package {
 		private var debugEnabled:Boolean = false;
 		private var debugTextField:TextField = null;
 		private var debugText:String = "";
+		private var debugLayer:Sprite = null;
 
 		private var livesDisplay:TextField = null;
 		private var scoreDisplay:TextField = null;
@@ -285,6 +286,30 @@ package {
 		}
 
 		/**
+		 * debugDrawMoves
+		 */
+		private function debugDrawMoves():void {
+			if (debugLayer == null) {
+				debugLayer = new Sprite();
+				addChild(debugLayer);
+			}
+
+			var gfx:Graphics = debugLayer.graphics;
+			
+			gfx.clear();
+
+			gfx.lineStyle(1, 0xFF0000);
+			for each (var enemy:Enemy in enemies) {
+				gfx.moveTo(enemy.x, enemy.y);
+				gfx.lineTo(enemy.targetPoint.x, enemy.targetPoint.y);
+			}
+
+			gfx.lineStyle(1, 0xFFFF00);
+			gfx.moveTo(yellowSubmarine.x, yellowSubmarine.y);
+			gfx.lineTo(yellowSubmarine.x + yellowSubmarine.width, yellowSubmarine.y);
+		}
+
+		/**
 		 * createTextFormat
 		 *
 		 * @return
@@ -358,6 +383,7 @@ package {
 
 			if (debugEnabled) {
 				//addDebugText(enemy ? enemy.toString() : "[null]");
+				debugDrawMoves();
 				debugKeys();
 				debugPrint();
 			}

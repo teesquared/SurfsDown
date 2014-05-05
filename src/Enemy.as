@@ -11,7 +11,7 @@ package
 	 */
 	public class Enemy extends GameSprite 
 	{
-		protected var targetPoint:Point = new Point();
+		public var targetPoint:Point = new Point();
 		public var health:uint = 1;
 
 		protected static const NEAR_DISTANCE:Number = 4;
@@ -96,17 +96,53 @@ package
 
 			const sw:Number = SurfsDown.WIDTH;
 			const sh:Number = SurfsDown.HEIGHT;
+			const ys:Sprite = SurfsDown.yellowSubmarine;
 
-			/*
-			targetPoint.x = -sw / 2 + sw * 2 * Math.random();
-			targetPoint.y = -sh / 2 + sh * 2 * Math.random();
-			*/
+			var sx:Number = Math.random() * sw;
+			var sy:Number = Math.random() * sh;
+			
+			if (ys != null && Math.random() < 0.2) {
+				sx = ys.x;
+				sy = ys.y;
+			}
 
-			const rw:Number = sw / 2 * Math.random();
-			const rh:Number = sh / 2 * Math.random();
+			const dx:Number = sx - x;
+			const dy:Number = sy - y;
 
-			targetPoint.x = rw < sw / 4 ? -rw : sw + rw / 4;
-			targetPoint.y = rh < sh / 4 ? -rh : sh + rh / 4;
+			const d:Number = Math.sqrt(dx * dx + dy * dy);
+			const nx:Number = dx / d;
+			const ny:Number = dy / d;
+
+			const x0:Number = Math.min(-128, -width);
+			const x1:Number = sw - x0;
+			const y0:Number = Math.min(-128, -height);
+			const y1:Number = sh - y0;
+
+			const my:Number = ny / nx;
+			const mx:Number = nx / ny;
+
+			const angle:Number = Math.atan2(ny, nx) * Utils.RADS_TO_DEGREES;
+			const loc:int = (int(angle + 180 + 45) % 360) / 90;
+
+			switch (loc) {
+				case 0: // x0
+					targetPoint.x = x0;
+					targetPoint.y = my * (x0 - x) + y;
+					break;
+				case 1: // y0
+					targetPoint.x = mx * (y0 - y) + x;
+					targetPoint.y = y0;
+					break;
+				case 2: // x1
+					targetPoint.x = x1;
+					targetPoint.y = my * (x1 - x) + y;
+					break;
+				case 3: // y1
+				default:
+					targetPoint.x = mx * (y1 - y) + x;
+					targetPoint.y = y1;
+					break;
+			}
 		}
 
 		/**
